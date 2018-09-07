@@ -1,0 +1,127 @@
+>>v4h-0106
+1. Add below lines to tp_lib.c to solve power on baseline issue.
+		pbT3 = MutualBaseLine[freqIndex];
+		pbT2 = MutualBaseLine[freqIndex];
+		pbT1 = MutualBaseLine[freqIndex];
+		pbT0 = MutualBaseLine[freqIndex];
+2. BUGs to do: Still for MI2 only.
+
+>>v4h-0104
+1. Solve incomplete TP_CUSTOMER_PROTOCOL issue and make it to be 0/1 selection.
+
+
+>>v3h-1220
+1. Adding hopping mode function.
+2. Change key baseline type to STRAC type and detecting method to LDECT.
+3. Support maxima 24x14 when REDUCE_XRAM=1. Change the REDUCE_XRAM setting must re-package the library by Winpower.
+4. Support maxima 23*12  or 24*11 when REDUCE_XRAM=0. Change the REDUCE_XRAM setting must re-package the library by Winpower.
+5. Default SELF_PROCESS = 1.
+6. NOTE !!!: This version don't support FPCA test and SELF mode debug. This version is only for HOPPING evaluation purpose !
+
+How to upgrade from 13-1206:
+	Base ob new package files,
+1. Use old USER_PROTOCOL.c/.h and old ADC_GEN.c to overlay the files on the new package.
+2. Set SELF_PROCESS = 1 in the USER_PROTOCOL.H.
+
+
+
+>>13-1206
+1. Adds the feature to support the new SELF_SHARE_KEY type embedded self key sensor
+2. Move key baseline calculation and detection functions out of tp_lib.c for hardware independable design.
+3. Optimize the key processing codes size and speed, but keep the same algorithm as mutual type. The old self key algorithm was gived up.
+4. All sensor key types call the same key algorithm. 
+
+
+>>13-1128
+1. Fix point reported at key pressing position fro mutual down key sensor.
+2. Fixed the issue: Y axis can not reach max.value @ self mode enabled and 1 finger touching.
+3. Move i2c_RcvBuf[..] declaration to global_var.c, which make the customer can modify the I2C_RCV_BUF_SIZE to determine the buffer size. Note: do not set the I2C_RCV_BUF_SIZE more than 255.
+4. Move report_Buffer[..] declaration to global_var.c, which make the customer can modify the RPT_BUF_SIZE to determine the buffer size. Note: do not set the RPT_BUF_SIZE more than 255.
+
+
+
+>>13-1113
+1. In rightkey sensor, if the raw data of the key RX column exceed 3000, it will be forced to set to 1200. 
+	This avoid noise raw data and  noise delta.
+2. Set LARGE_AREA=0, ISOTRI_CANCEL=0 to make more flash space.
+3. Limit the I2C received not overflow by limit i2c_RcvLen add 1.  Search AD0924
+4. Change Co_FWAP_Protocol back to 0x00D3 or Jack AP compatibility.
+5. Fix point reported at key pressing position fro mutual right key sensor.
+6. Change 
+	U8 addr_idx;
+   To:
+	U16 addr_idx;
+7. Add Timer1 function calls for customers protocol design. This Timer1 was not used by WP internal codes. All timer1 initialization and calling must be take care by the customer. See global_vars.h.
+
+>>13-0915A
+1. New MUTUAL_FORCE_RKEY_CC definition to let Right KEY RX CC value can be set indenpendently.
+>>13-0915
+1. Set SELF mode as first priority. 2F using SELF mode. >= 3F using mutual mode. 
+2. Adjust TAPPING_DISTANCE to 2000, around 2.5 unit.
+
+>>13-0912
+1. Set SELF mode as first priority. 1F using SELF mode. >= 2F using mutual mode. 
+
+>>13-0905
+1. Support Self key raw/baseline/delta to send out in TpFillRawdataPacket()
+2. Fix TpFillRawdataPacket() send wrong self key data in mutual matrix bug. This bug happened in self-key sensor.
+3. Fix 3 fingers not working when using right-key sensor. Search "3F_FAIL"
+
+>>13-0904
+1. New TESTMODE_SELF_CC parameter to force test mode CC values are fixed for RAW checking. Search "TestMode_SelfCC" related.
+	Set the TESTMODE_SELF_CC to 0 to use auto cc mode.
+2. Send AP with Mkey delta and do optimization for code size. Search "TpFillRawdataPacket".
+
+>>13-0903
+1. Fixed algorithm for Righ-Key type TP. Search "nowRow_ptr+=Total_RX".
+
+>>13-0830
+1. Base on 0817 version.
+2. Change key baseline algorithm.
+3. Add thumb finger support
+4. Adjust RAW/BASELINE/DELTA matrix dimension to full area
+5. Change header CAP_1 definition to put key_type information
+6. Change header XL_SIZE/YR_SIZE definition from AA size to full mutual arae size.
+
+>>13-0731
+1. Reduce Sleep() more current.	"Search fgGotoSleep."
+2. Optimize switch_MCUDIV_FreqMode() , SetMcuMainClk().
+3. New SGP technology to reduce Active mode power consumption. "Search ACTIVE_POWER_SAVING."
+4. Disable auto-idle feature.
+
+>> 13-0724
+1. Add Sleep(void) and WakeUp(void) functions for clone market.
+2. Modify WatchDog_Initial() internal.
+
+>> 13-0723  Andy
+1. Add REDUCE_XRAM feature to save more RAM space which can drive up to 30x17 sensor. The REDUCE_XRAM setting is a compiler-directive setting.
+2. Let test mode & normal mode self parameter using same SELF_PULSE_COUNT, which let AP can reference the SELF delta.
+3. Modify to link with Jack'AP 286.2 for displaying mutual&self raw/baseline/delta data
+4. Reconstructure parameters location: Move all user parameters back to USER_PROTOCOL.H, for simplying the user tunning.
+5. Update USER_PROTOCOL.C to demo the Direct-Controll DMA method.
+6. Set LARGE_AREA & ISOTRI_CANCEL to 0 to improve 2-fingers pitch.
+7. Add back DETECTING_KEY_CHANGE  & DETECTING_POINT_CHANGE options.
+8. Update USER_PROTOCOL.C to show how to avoid points dropping.
+
+
+>> 2013/7/22 (//JS20130722 )
+1. remove #define Mutu_keyTpye but judge with flKeyPara.type
+
+>> 2013 7 10 ( //JS20130710a )
+1. Parameter struct update: tJitterIIRPara (add new struct members and remove enable proberty)
+2. Parameter add new struct: tDEBUGSettingPara
+3. Modify for new define: #define UseTrickToDEBLOCKING		1
+
+>> 13-0705
+1. New feature: Independent self delta gain adjustment.
+
+>> 13-0629:
+1. Re-add MUTUAL_FORCE_CC function.
+
+>> 13-0628 :
+1. Correct gain-adjustable mutual key detaction bugs: baseline update.
+2. Re-order flash_para parameters.
+
+>>V3A version 13-0627 Features:
+1. Gain-adjustable mutual key detaction
+2. High-immunity to charger noise.
